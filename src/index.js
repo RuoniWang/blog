@@ -1,10 +1,30 @@
-import $ from 'jquery';
-import './style.scss';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { createStore, applyMiddleware, compose } from 'redux';
+import thunk from 'redux-thunk';
+import reducers from './reducers';
+import App from './app';
+import { ActionTypes } from './actions';
 
-let num = 0;
-$('#main').html(`you have been on this page for ${num} seconds`);
 
-setInterval(() => {
-  num += 1;
-  $('#main').html(`You've been on this page for ${num} seconds.`);
-}, 1000);
+// this creates the store with the reducers, and does some other stuff to initialize devtools
+
+
+const store = createStore(reducers, {}, compose(
+  applyMiddleware(thunk),
+  window.devToolsExtension ? window.devToolsExtension() : f => f,
+));
+
+const token = localStorage.getItem('token');
+if (token) {
+  console.log('token found when mounting store!');
+  store.dispatch({ type: ActionTypes.AUTH_USER });
+}
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+  , document.getElementById('main'),
+);
